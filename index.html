@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>死者代言人 · 人物关系图鉴 V2.1</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1a2130; --ink:#e6e1d5; --muted:#9aa4b2;
+    --line:#2d333f; --gold:#e0b15c; --cyan:#5cc8e0; --red:#e0655c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Songti SC","STSong","Noto Serif SC",serif;background:var(--bg);color:var(--ink);height:100vh;overflow:hidden}
+  header{height:56px;display:flex;align-items:center;gap:14px;padding:0 20px;background:linear-gradient(90deg,#101826,#16202f);border-bottom:1px solid var(--line)}
+  header h1{font-size:18px;letter-spacing:4px;white-space:nowrap}
+  header h1 small{font-size:11px;color:var(--muted);letter-spacing:1px;margin-left:6px}
+  .tabs{display:flex;gap:6px;flex-shrink:0}
+  .tabs button{font-family:inherit;font-size:13px;padding:5px 14px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:16px;cursor:pointer;letter-spacing:2px}
+  .tabs button.active{background:var(--gold);color:#1a1408;border-color:var(--gold)}
+  .spoiler{margin-left:auto;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+  .spoiler .lb{font-size:11px;color:var(--muted);letter-spacing:1px;margin-right:2px}
+  .spoiler button{font-family:inherit;font-size:11px;padding:4px 10px;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:12px;cursor:pointer;letter-spacing:1px}
+  .spoiler button.active{border-color:var(--gold);color:var(--gold);background:rgba(224,177,92,.1)}
+  .spoiler button.m2.active{border-color:var(--red);color:var(--red);background:rgba(224,101,92,.1)}
+  main{display:flex;height:calc(100vh - 56px)}
+  /* 左侧列表 */
+  aside{width:330px;min-width:270px;border-right:1px solid var(--line);overflow-y:auto;background:var(--panel);padding:12px}
+  .chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+  .chips button{font-family:inherit;font-size:11px;padding:3px 10px;border:1px solid var(--line);border-radius:11px;background:transparent;color:var(--muted);cursor:pointer;letter-spacing:1px}
+  .chips button.active{border-color:var(--gold);color:var(--gold);background:rgba(224,177,92,.1)}
+  .family h2{font-size:13px;color:var(--gold);letter-spacing:3px;margin:12px 4px 8px;padding-bottom:4px;border-bottom:1px dashed var(--line)}
+  .cards{display:flex;flex-direction:column;gap:7px}
+  .card{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:7px 11px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:11px}
+  .card:hover{border-color:var(--gold);transform:translateY(-1px)}
+  .card.sel{border-color:var(--gold);box-shadow:0 0 0 2px rgba(224,177,92,.22)}
+  .card .avatar{width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid var(--line);flex:none}
+  .card .name{font-size:15px;letter-spacing:1px}
+  .card .tag{font-size:11px;color:var(--muted);margin-top:2px}
+  .card .sp{flex:none;margin-left:auto;font-size:10px;border:1px solid;border-radius:9px;padding:1px 7px;letter-spacing:1px}
+  .sp-S1{color:var(--cyan);border-color:rgba(92,200,224,.5)}
+  .sp-S2{color:var(--red);border-color:rgba(224,101,92,.5)}
+  /* 右侧详情 */
+  section{flex:1;overflow-y:auto;padding:30px 40px}
+  .detail{max-width:720px;margin:0 auto}
+  .detail .portrait{width:170px;height:170px;border-radius:50%;object-fit:cover;border:3px solid var(--line);float:left;margin:0 22px 12px 0;background:var(--panel)}
+  .detail h2{font-size:28px;letter-spacing:4px;color:var(--gold);margin-bottom:2px}
+  .detail .en{font-size:12px;color:var(--muted);letter-spacing:1px;margin-bottom:12px}
+  .detail .meta{font-size:13px;color:var(--muted);margin-bottom:16px;letter-spacing:1px;clear:both}
+  .detail .meta span{margin-right:12px}
+  .detail p{line-height:2;font-size:15px;text-align:justify;margin-bottom:14px;text-indent:2em}
+  .lnk{color:var(--cyan);cursor:pointer;border-bottom:1px dashed var(--cyan);padding:0 1px}
+  .lnk:hover{background:rgba(92,200,224,.1)}
+  .spbox{border:1px dashed rgba(224,101,92,.55);background:rgba(224,101,92,.06);border-radius:9px;padding:14px 18px;margin:0 0 14px;cursor:pointer}
+  .spbox .t{font-size:13px;color:var(--red);letter-spacing:2px;margin-bottom:8px}
+  .spbox p{text-indent:2em;margin:0}
+  .spbox.locked p{display:none}
+  .relbox{clear:both;border-top:1px dashed var(--line);padding-top:14px;margin-top:8px}
+  .relbox h3{font-size:14px;letter-spacing:3px;color:var(--gold);margin-bottom:10px}
+  .relrow{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px dotted var(--line);font-size:14px}
+  .relrow .rv{flex:none;font-size:10px;border:1px solid;border-radius:9px;padding:1px 8px;letter-spacing:1px}
+  .relrow .rl2{color:var(--muted);font-size:12px}
+  .relrow .lv{flex:none;margin-left:auto;font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:0 6px}
+  .rellock{font-size:12px;color:var(--muted);padding:8px 0;cursor:pointer}
+  .rellock:hover{color:var(--gold)}
+  .close-btn{display:none}
+  @media (max-width:820px){
+    body{overflow:auto;height:auto}
+    header{flex-wrap:wrap;height:auto;padding:8px 12px;gap:6px}
+    header h1{font-size:15px}
+    .spoiler{margin-left:0}
+    main{flex-direction:column;height:auto}
+    aside{width:100%;min-width:0;border-right:none;border-bottom:1px solid var(--line)}
+    .cards{flex-direction:row;flex-wrap:wrap}
+    .card{width:calc(50% - 4px);flex-direction:column;gap:4px;text-align:center;padding:10px 6px}
+    .card .sp{margin:0}
+    section{position:fixed;inset:0;z-index:50;background:var(--bg);padding:16px 20px 40px;transform:translateY(102%);transition:transform .25s ease;overflow-y:auto}
+    section.open{transform:translateY(0)}
+    .close-btn{display:block;position:sticky;top:0;margin-left:auto;z-index:2;font-family:inherit;font-size:13px;padding:6px 14px;border:1px solid var(--gold);border-radius:16px;background:var(--panel);color:var(--gold);cursor:pointer;letter-spacing:1px}
+    .detail .portrait{float:none;display:block;margin:0 auto 14px}
+    .detail{text-align:center}
+    .detail p{text-align:justify}
+    .relrow{text-align:left}
+    .tree-legend{font-size:10px;gap:8px 12px;padding:6px 10px}
+    #treeAction{max-width:calc(100vw - 40px);overflow:hidden;text-overflow:ellipsis}
+  }
+  /* ── 关系图谱 ── */
+  #treeWrap{display:none;height:calc(100vh - 57px);overflow:auto;background:var(--bg);position:relative}
+  #treeCanvas{position:relative;width:1420px;height:880px}
+  #treeCanvas svg{position:absolute;inset:0;pointer-events:none}
+  .tnode{position:absolute;width:88px;text-align:center;cursor:pointer;transform:translate(-50%,0);transition:opacity .18s,transform .15s}
+  .tnode:hover{transform:translate(-50%,-4px)}
+  .tnode img{width:60px;height:60px;border-radius:50%;object-fit:cover;border:3px solid var(--line);background:var(--panel2)}
+  .tnode .tn{font-size:13px;margin-top:4px;letter-spacing:1px;color:var(--ink);font-weight:bold}
+  .tnode .tt{font-size:10px;color:var(--muted);letter-spacing:0}
+  .tnode .sd{position:absolute;top:2px;right:8px;font-size:9px;color:var(--red);border:1px solid rgba(224,101,92,.6);background:var(--bg);border-radius:7px;padding:0 4px}
+  .tcluster{position:absolute;font-size:14px;letter-spacing:5px;color:var(--gold);border-bottom:1px solid var(--gold);padding-bottom:3px;font-weight:bold;white-space:nowrap}
+  .tree-legend{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 16px;font-size:11px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;border-bottom:1px dashed var(--line)}
+  .tree-legend i{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin-right:4px}
+  .tree-legend i.dbl{height:3px;border-top:3px double}
+  #treeDetail{position:fixed;top:56px;right:0;bottom:0;width:min(540px,100vw);background:var(--bg);border-left:1px solid var(--line);box-shadow:-8px 0 30px rgba(0,0,0,.5);padding:22px 26px;overflow-y:auto;z-index:60;display:none}
+  #treeDetail.open{display:block}
+  #treeDetail .portrait{width:130px;height:130px;border-radius:50%;object-fit:cover;border:3px solid var(--line);display:block;margin:0 auto 12px}
+  #treeDetail h2{font-size:24px;letter-spacing:3px;color:var(--gold);text-align:center}
+  #treeDetail .en{text-align:center;font-size:11px;color:var(--muted);margin-bottom:10px}
+  #treeDetail .meta{text-align:center;font-size:12px;color:var(--muted);margin-bottom:12px}
+  #treeDetail p{line-height:1.95;font-size:14px;text-align:justify;margin-bottom:12px;text-indent:2em}
+  #treeDetail .close-btn{display:block;position:sticky;top:0;margin-left:auto;z-index:2;font-family:inherit;font-size:13px;padding:6px 14px;border:1px solid var(--gold);border-radius:16px;background:var(--panel);color:var(--gold);cursor:pointer;letter-spacing:1px}
+  .lk{transition:opacity .18s}
+  #treeCanvas.hovering .lk{opacity:.12}
+  #treeCanvas.hovering .lk.on{opacity:1}
+  .lk.on path,.lk.on line{stroke-width:4.5px !important}
+  #treeCanvas.hovering .tnode{opacity:.28;filter:grayscale(.6)}
+  #treeCanvas.hovering .tnode.on{opacity:1;filter:none}
+  .tnode.on img{border-color:var(--gold);box-shadow:0 0 0 3px rgba(224,177,92,.3)}
+  .rl{opacity:0;font-size:12px;fill:var(--gold);font-weight:bold;paint-order:stroke;stroke:#0d1117;stroke-width:4px;letter-spacing:1px;transition:opacity .18s;pointer-events:none}
+  .lk.on .rl{opacity:1}
+  #treeAction{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(80px);z-index:70;background:var(--gold);color:#1a1408;border:none;border-radius:24px;padding:11px 26px;font-family:inherit;font-size:15px;letter-spacing:2px;box-shadow:0 6px 20px rgba(224,177,92,.35);cursor:pointer;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap}
+  #treeAction.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+  /* 剧透确认弹层 */
+  #spModal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center}
+  #spModal.open{display:flex}
+  #spModal .box{background:var(--panel);border:1px solid rgba(224,101,92,.6);border-radius:14px;padding:26px 30px;max-width:340px;text-align:center}
+  #spModal .box h3{font-size:16px;color:var(--red);letter-spacing:3px;margin-bottom:10px}
+  #spModal .box p{font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:18px}
+  #spModal .box .btns{display:flex;gap:10px;justify-content:center}
+  #spModal button{font-family:inherit;font-size:13px;padding:7px 20px;border-radius:16px;cursor:pointer;letter-spacing:2px}
+  #spOk{background:var(--red);color:#fff;border:1px solid var(--red)}
+  #spCancel{background:transparent;color:var(--muted);border:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header>
+  <h1>死者代言人<small>Speaker for the Dead · 人物关系图鉴</small></h1>
+  <div class="tabs"><button data-v="list" class="active">人物列表</button><button data-v="tree">关系图谱</button></div>
+  <div class="spoiler" id="spMode">
+    <span class="lb">剧透</span>
+    <button data-m="0">零剧透</button><button data-m="1" class="active">至中期</button><button data-m="2" class="m2">全书结局</button>
+  </div>
+</header>
+<main>
+  <aside><div class="chips" id="chips"></div><div id="list"></div></aside>
+  <section><div class="detail" id="detail"></div></section>
+</main>
+<div id="treeWrap">
+  <div class="tree-legend" id="legend"></div>
+  <div id="treeCanvas"></div>
+</div>
+<div id="treeDetail"></div>
+<button id="treeAction"></button>
+<div id="spModal"><div class="box">
+  <h3>确认查看全书剧透？</h3>
+  <p>「全书结局」模式将显示 S2 级内容：血缘反转、死亡真相、最终盟约等结局级信息。建议读完小说后再开启。</p>
+  <div class="btns"><button id="spOk">我读过，开启</button><button id="spCancel">再想想</button></div>
+</div></div>
+<script>
+/* ═══ 人物数据 ═══
+   spoiler: S0 表层 / S1 中期 / S2 结局; desc 为安全传记, desc2 为剧透段落(按模式显隐) */
+const PEOPLE=[
+{id:"ender",name:"安德·维京",en:"Andrew “Ender” Wiggin",group:"星际来客",role:"死者代言人",spoiler:"S2",tags:["核心人物"],desc:"以「安德鲁·维京」之名行走星际的死者代言人——一位为亡者讲述真实一生的学者。他应{novinha}多年前的召唤来到卢西塔尼亚，为死去的{pipo}代言，却一步步被卷入这个殖民地最深的秘密。",desc2:"他真正的名字是安德·维京——三千年前终结虫族战争的那个孩子。他随身携带{hive-queen}的虫茧，与{jane}形影不离。在卢西塔尼亚，他揭开{pipo}与{libo}之死的真相、希贝拉家的双重父亲之谜，最终与{novinha}结为夫妻，并亲手推动人类、坡奇尼奥与虫族的三方新秩序。"},
+{id:"jane",name:"简",en:"Jane",group:"人工智能",role:"安塞波中的自我意识体",spoiler:"S2",tags:["核心人物"],desc:"栖身于安塞波网络的自我意识体，没有形体，却拥有横跨星海的算力与记忆。她通过安德耳后的植入式终端与他相伴，是他沉默而不可或缺的同伴。",desc2:"她诞生于安德在虫族战争末期无意识的一次网络行为。卢西塔尼亚危机中，她截获星际议会的降罪令、调动舰队信息力保殖民地；风波之后，她开始与受伤的{miro}建立新的伙伴关系。"},
+{id:"valentine",name:"华伦蒂",en:"Valentine Wiggin",group:"特隆海姆",role:"历史学家 · 作家",spoiler:"S2",tags:[],desc:"安德的姐姐，历史学家与作家，随丈夫定居冰雪覆盖的特隆海姆。她是安德一生中最亲密的人，也是唯一始终知道「安德鲁·维京」究竟是谁的人。",desc2:"当安德在卢西塔尼亚身陷风暴，她放下特隆海姆的家庭与生活，启程穿越星海去支援弟弟——一如三千年前她赶在他崩溃之前那样。"},
+{id:"hive-queen",name:"虫族女王",en:"The Hive Queen",group:"虫族",role:"虫族最后的幸存女王",spoiler:"S2",tags:[],desc:"虫族最后的幸存女王。三千年前她的族群被安德歼灭，唯一一枚虫茧被安德带在身边，以心灵感应与他默默交流，等待一个可以重生的世界。",desc2:"她选中了卢西塔尼亚。安德把虫茧安置进森林深处，她在那里苏醒，重建族群——不是作为武器，而是作为新秩序的第三方。"},
+{id:"pipo",name:"皮波",en:"João Figueira Alvarez",group:"菲盖拉家",role:"外星人类学家",spoiler:"S1",tags:["外星人类学家"],desc:"卢西塔尼亚外星人类学的奠基人，{libo}之父。他是第一个真正走进坡奇尼奥森林的学者，{novinha}的师长，待她如同己出。",desc2:"鲁特死后，他把死因写成「意外」，却不知这恰恰触发了一连串跨物种误读。最终他因触碰{rooter}被种下后的躯体而被坡奇尼奥「处置」——不是谋杀，而是一场彻头彻尾的误解。"},
+{id:"libo",name:"利波",en:"Liberdade Graças a Deus Figueira de Medici",group:"菲盖拉家",role:"外星人类学家",spoiler:"S2",tags:["外星人类学家"],desc:"皮波之子，殖民地第二代外星人类学家，{ouanda}的父亲。他继承了父亲的研究，也继承了与坡奇尼奥之间脆弱而珍贵的信任。",desc2:"他还是{novinha}秘密的恋人与她六个孩子的生父。他同样死于第三生命仪式——坡奇尼奥想赐予他「永生」，却要了他的命。他的死让娜温妮阿第二次召唤死者代言人。"},
+{id:"ouanda",name:"欧安达",en:"Ouanda Quenhatta Figueira Mucumbi",group:"菲盖拉家",role:"外星人类学家",spoiler:"S2",tags:["外星人类学家"],desc:"利波之女，与{miro}一起继承两代学者的野外研究，长期秘密向坡奇尼奥传授人类知识——这本身已触犯星际法律。",desc2:"她与米罗相爱多年并计划结婚，却在故事高潮处被揭开：两人是同父异母兄妹。这场婚约就此化为全书最痛的注脚之一。"},
+{id:"novinha",name:"娜温妮阿",en:"Ivanova Santa Catarina von Hesse",group:"希贝拉家",role:"外星生物学家",spoiler:"S2",tags:[],desc:"卢西塔尼亚最负盛名的外星生物学家。少年时父母死于跨物种瘟疫，青年时接连失去{pipo}与{libo}——她把每一场死亡都归咎于自己。",desc2:"为了守住利波的孩子，她利用{marcao}的不育与暴戾，让他替六个孩子当了多年「父亲」。安德揭开这一切之后，她与安德结为夫妻，重新学会活着。"},
+{id:"marcao",name:"马科斯·希贝拉（马考恩）",en:"Marcos Maria Ribeira “Marcão”",group:"希贝拉家",role:"娜温妮阿的法定丈夫",spoiler:"S2",tags:[],desc:"娜温妮阿的法定丈夫，酒馆里人高马大的恶汉。酗酒、家暴、常年不归，是希贝拉家孩子们童年的噩梦。",desc2:"他天生不育，身患绝症，至死不知孩子非亲生，却又是真正想保护这个家的那个人。安德在葬礼上为他代言——一个粗鲁灵魂的全部委屈、爱与孤独第一次被人看见。"},
+{id:"miro",name:"米罗",en:"Marcos Vladimir Ribeira von Hesse",group:"希贝拉家",role:"外星人类学家",spoiler:"S2",tags:["外星人类学家"],desc:"娜温妮阿的长子，第三代外星人类学家，把青春全部献给坡奇尼奥研究。他是家里第一个真正理解安德工作的人。",desc2:"得知自己与{ouanda}的血缘真相后，他冲过隔绝人类与森林的围栏——高压电摧毁了他的神经。结尾他踏上旅程，去迎接穿越星海前来的{valentine}一行。"},
+{id:"ela",name:"埃拉",en:"Ekaterina Elanora Ribeira von Hesse",group:"希贝拉家",role:"外星生物学家",spoiler:"S2",tags:[],desc:"娜温妮阿的长女，冷静早慧的外星生物学家。当全家还在互相沉默，她第一个决定把秘密交给死者代言人。",desc2:"是她请求{ender}为父亲{marcao}代言，直接把家族最深的伤口摊开在光天化日之下。此后她又协助安德向殖民地解释卢西塔尼亚生命体系的真相。"},
+{id:"quim",name:"金",en:"Estevão Rei Ribeira von Hesse",group:"希贝拉家",role:"学生 · 虔诚的天主教徒",spoiler:"S1",tags:[],desc:"虔诚的天主教徒，希贝拉家的三子。起初他视死者代言人为异端，处处与安德作对，是家里敌意最外露的一个。",desc2:"随着真相展开，他的敌意一点点松动——在父亲葬礼上，他第一次为一个「异端」的发言落泪。（续作中的传教与殉道不属本站范围。）"},
+{id:"olhado",name:"奥尔拉多",en:"Lauro Suleimão Ribeira von Hesse",group:"希贝拉家",role:"学生",spoiler:"S1",tags:[],desc:"因童年事故失去双眼、装着一对电子眼的少年。他最先向{ender}敞开家门，带他走进希贝拉家，是这个伤痕累累之家的第一位向导。",desc2:"他用影像记录家中的一切——那些记录后来成为安德拼凑真相的关键碎片。"},
+{id:"quara",name:"科尤拉",en:"Lembrança das Milagres de Jesus Ribeira von Hesse",group:"希贝拉家",role:"学生",spoiler:"S1",tags:[],desc:"敏感的幼女。家庭创伤让她长期失语，用沉默把自己包裹起来。",desc2:"在安德身边，她重新开口说话——她渴望的只是一个不会再消失的父亲。"},
+{id:"grego",name:"格雷戈",en:"Gerão Gregorio Ribeira von Hesse",group:"希贝拉家",role:"学生",spoiler:"S1",tags:[],desc:"年幼好斗的幼子，攻击性是他对家庭暴力最直接的模仿。与安德初见时的那一扑，撕开了这个家最深的伤口。",desc2:"安德没有躲，也没有还手。慢慢地，这只小刺猬收起了刺。"},
+{id:"peregrino",name:"佩雷格里诺",en:"Armão Cebola “Bishop Peregrino”",group:"殖民地权力",role:"主教",spoiler:"S1",tags:[],desc:"卢西塔尼亚的主教，殖民地天主教会的最高权威。他最初把死者代言人视为危险的异端，处处提防。",desc2:"殖民地危机中，他放下成见与安德形成有限合作——在教义与真相之间，他选择了对殖民地最有利的那条路。"},
+{id:"bosquinha",name:"波斯基娜",en:"Faria Lima Maria do Bosque “Bosquinha”",group:"殖民地权力",role:"总督兼米拉格雷市长",spoiler:"S1",tags:[],desc:"殖民地总督兼米拉格雷市长，行政首脑。她务实、警觉，最初对安德充满戒备——在她的位置上，外来者从不是好消息。",desc2:"星际议会决定降罪卢西塔尼亚时，是她与{dom-cristao}拼死保存研究资料，并在议会舰队面前与安德并肩。"},
+{id:"dom-cristao",name:"堂·克里斯托",en:"Amai a Tudomundo Para Que Deus vos Ame Cristão",group:"殖民地权力",role:"基督圣灵之子修会会长",spoiler:"S1",tags:[],desc:"基督圣灵之子修会会长，殖民地学校体系的主持者，理性、克制、重知识。他比主教更早看清安德工作的价值。",desc2:"他向安德敞开修会的档案与记忆，是调查得以推进的关键援手。"},
+{id:"rooter",name:"鲁特",en:"Rooter",group:"坡奇尼奥",role:"父亲树",spoiler:"S2",tags:[],desc:"最早与皮波、利波建立深层交流的坡奇尼奥之一，好奇、睿智，总在追问关于人类与星空的问题。",desc2:"他被杀害后，族人把他「种下」——以父亲树的形态获得了坡奇尼奥的第三生命。他正是「人类」的父亲，也仍能以树的形态与人类交流。"},
+{id:"human",name:"人类",en:"Human",group:"坡奇尼奥",role:"鲁特之子",spoiler:"S2",tags:[],desc:"鲁特之子，最好学的年轻坡奇尼奥。他主动学习人类的语言，反复追问《虫族女王和霸主》的故事，是推动盟约的核心人物。",desc2:"最终安德按盟约亲手把他「种下」，助他进入第三生命成为父亲树——这不是处决，而是一个种族对另一个种族最高的礼遇。"},
+{id:"mandachuva",name:"曼达楚阿",en:"Mandachuva",group:"坡奇尼奥",role:"兄弟",spoiler:"S2",tags:[],desc:"参与早期接触的坡奇尼奥「兄弟」之一。他真诚而天真，始终想让人类理解自己的文化。",desc2:"正是他向妻子们转述{pipo}之死的疑问，导致妻子们下令「处置」皮波——一场善意引发的悲剧，也是跨物种误读链条的第一环。"},
+{id:"leaf-eater",name:"吃树叶者",en:"Leaf-eater",group:"坡奇尼奥",role:"兄弟",spoiler:"S2",tags:[],desc:"对人类警惕心最强的坡奇尼奥之一。他反对过快亲近人类，代表族群内部更保守的声音。",desc2:"与{libo}之死直接相关——他同样试图用仪式「拯救」这位人类学者。"},
+{id:"star-looker",name:"看星星者（大嗓门）",en:"Star-looker “Shouter”",group:"坡奇尼奥",role:"妻子们的发言人",spoiler:"S2",tags:[],desc:"妻子们的发言人，兄弟们背后称她「大嗓门」。在坡奇尼奥社会里，女性掌握真正的繁衍与决策大权。",desc2:"她在生育场与安德正面谈判，最终代表坡奇尼奥与人类、虫族缔结新盟约。她的正式名字「看星星者」，预示这个物种望向星空的未来。"},
+];
+/* ═══ 关系数据: v=视觉类型, level=剧透级别 ═══ */
+const RELS=[
+{id:"R01",a:"valentine",b:"ender",v:"kinship",label:"姐弟",level:"S0"},
+{id:"R02",a:"ender",b:"jane",v:"bond",label:"同伴·助手",level:"S0"},
+{id:"R03",a:"ender",b:"hive-queen",v:"bond",label:"受托守护",level:"S1"},
+{id:"R04",a:"pipo",b:"libo",v:"kinship",label:"父子",level:"S0"},
+{id:"R05",a:"pipo",b:"novinha",v:"mentor",label:"师长·如父",level:"S1"},
+{id:"R06",a:"libo",b:"novinha",v:"romance",label:"恋人",level:"S1"},
+{id:"R07",a:"marcao",b:"novinha",v:"marriage",label:"名义夫妻",level:"S1"},
+{id:"R08",a:"libo",b:"ouanda",v:"kinship",label:"父女",level:"S1"},
+{id:"R09",a:"miro",b:"ouanda",v:"work",label:"工作伙伴",level:"S0"},
+{id:"R10",a:"miro",b:"ouanda",v:"romance",label:"恋人·未婚夫妻",level:"S2"},
+{id:"R11",a:"miro",b:"ouanda",v:"kinship",label:"同父异母兄妹",level:"S2"},
+{id:"R12",a:"miro",b:"libo",v:"mentor",label:"学徒·精神父辈",level:"S1"},
+{id:"R13",a:"ouanda",b:"libo",v:"mentor",label:"父女·学徒",level:"S1"},
+{id:"R14",a:"ender",b:"marcao",v:"speaking",label:"代言",level:"S1"},
+{id:"R15",a:"ender",b:"libo",v:"speaking",label:"代言",level:"S1"},
+{id:"R16",a:"ender",b:"pipo",v:"speaking",label:"代言",level:"S1"},
+{id:"R17",a:"ela",b:"ender",v:"speaking",label:"代言请求",level:"S1"},
+{id:"R18",a:"olhado",b:"ender",v:"bond",label:"向导·信任",level:"S1"},
+{id:"R19",a:"ender",b:"novinha",v:"marriage",label:"结为夫妻",level:"S2"},
+{id:"R20",a:"bosquinha",b:"peregrino",v:"authority",label:"行政·教会",level:"S0"},
+{id:"R21",a:"peregrino",b:"dom-cristao",v:"authority",label:"主教·修会",level:"S0"},
+{id:"R22",a:"dom-cristao",b:"ender",v:"bond",label:"合作",level:"S1"},
+{id:"R23",a:"bosquinha",b:"ender",v:"bond",label:"接待·合作",level:"S1"},
+{id:"F01",a:"novinha",b:"miro",v:"kinship",label:"母子",level:"S0"},
+{id:"F02",a:"novinha",b:"ela",v:"kinship",label:"母女",level:"S0"},
+{id:"F03",a:"novinha",b:"quim",v:"kinship",label:"母子",level:"S0"},
+{id:"F04",a:"novinha",b:"olhado",v:"kinship",label:"母子",level:"S0"},
+{id:"F05",a:"novinha",b:"quara",v:"kinship",label:"母女",level:"S0"},
+{id:"F06",a:"novinha",b:"grego",v:"kinship",label:"母子",level:"S0"},
+{id:"F07",a:"marcao",b:"miro",v:"legal",label:"法定父子",level:"S1"},
+{id:"F08",a:"marcao",b:"ela",v:"legal",label:"法定父女",level:"S1"},
+{id:"F09",a:"marcao",b:"quim",v:"legal",label:"法定父子",level:"S1"},
+{id:"F10",a:"marcao",b:"olhado",v:"legal",label:"法定父子",level:"S1"},
+{id:"F11",a:"marcao",b:"quara",v:"legal",label:"法定父女",level:"S1"},
+{id:"F12",a:"marcao",b:"grego",v:"legal",label:"法定父子",level:"S1"},
+{id:"F13",a:"libo",b:"miro",v:"bio",label:"生物学父子",level:"S2"},
+{id:"F14",a:"libo",b:"ela",v:"bio",label:"生物学父女",level:"S2"},
+{id:"F15",a:"libo",b:"quim",v:"bio",label:"生物学父子",level:"S2"},
+{id:"F16",a:"libo",b:"olhado",v:"bio",label:"生物学父子",level:"S2"},
+{id:"F17",a:"libo",b:"quara",v:"bio",label:"生物学父女",level:"S2"},
+{id:"F18",a:"libo",b:"grego",v:"bio",label:"生物学父子",level:"S2"},
+{id:"P01",a:"rooter",b:"human",v:"kinship",label:"父子",level:"S1"},
+{id:"P02",a:"rooter",b:"pipo",v:"work",label:"研究·交流",level:"S1"},
+{id:"P03",a:"rooter",b:"libo",v:"work",label:"研究·交流",level:"S1"},
+{id:"P04",a:"mandachuva",b:"pipo",v:"ritual",label:"仪式误杀",level:"S2"},
+{id:"P05",a:"leaf-eater",b:"libo",v:"ritual",label:"仪式误杀",level:"S2"},
+{id:"P06",a:"human",b:"ender",v:"treaty",label:"缔约伙伴",level:"S2"},
+{id:"P07",a:"human",b:"ender",v:"ritual",label:"第三生命仪式",level:"S2"},
+{id:"P08",a:"star-looker",b:"ender",v:"treaty",label:"妻子们代表·谈判",level:"S2"},
+{id:"P09",a:"star-looker",b:"human",v:"authority",label:"妻子们·兄弟中介",level:"S1"},
+{id:"P10",a:"hive-queen",b:"ender",v:"bond",label:"托付·复活",level:"S2"},
+{id:"P11",a:"hive-queen",b:"rooter",v:"treaty",label:"跨物种交流",level:"S2"},
+{id:"P12",a:"hive-queen",b:"star-looker",v:"treaty",label:"三方新秩序",level:"S2"},
+];
+/* 图谱布局: 手绘坐标, 群体成簇 */
+const T_NODES=[
+// ── 星际来客 ──
+["valentine",170,70],["ender",420,70],["jane",590,70],["hive-queen",760,70],
+// ── 卢西塔尼亚:学者与家人 ──
+["pipo",150,280],["libo",300,280],["novinha",560,280],["marcao",700,280],
+// ── 殖民地权力 ──
+["bosquinha",950,280],["peregrino",1120,280],["dom-cristao",1340,280],
+// ── 希贝拉家的孩子们 ──
+["miro",430,470],["ouanda",560,470],["ela",690,470],["quim",790,470],["olhado",890,470],["quara",990,470],["grego",1090,470],
+// ── 坡奇尼奥 · 森林 ──
+["rooter",160,700],["human",320,700],["mandachuva",520,700],["leaf-eater",720,700],["star-looker",927,700],
+];
+/* 绘图边(52条; P12 仅以共同标签「三方新秩序」表达, 不画直接边) */
+const T_EDGES=[
+"R01","R02","R03","R04","R05","R06","R07","R08","R09","R10","R11","R12","R13","R14","R15","R16","R17","R18","R19","R20","R21","R22","R23",
+"F01","F02","F03","F04","F05","F06","F07","F08","F09","F10","F11","F12","F13","F14","F15","F16","F17","F18",
+"P01","P02","P03","P04","P05","P06","P07","P08","P09","P10","P11"
+];
+const CLUSTER_LABELS=[["星际来客",90,16],["卢西塔尼亚 · 学者与家人",90,226],["殖民地权力",950,232],["希贝拉家的孩子们",90,420],["坡奇尼奥 · 森林",90,646]];
+/* 视觉类型: 12 类 */
+const VSTYLE={
+  kinship:{n:"血缘",c:"#e0655c",w:2.5,dash:"",elbow:1},
+  legal:{n:"法定亲属",c:"#8b949e",w:2.5,dash:"",elbow:1},
+  bio:{n:"生物学亲属·S2",c:"#b48ce8",w:2.5,dash:"",elbow:1},
+  marriage:{n:"婚姻",c:"#d9a05b",w:2.5,dbl:1},
+  romance:{n:"恋爱",c:"#ef7fa8",w:2,dash:""},
+  mentor:{n:"师徒",c:"#7fc98f",w:2,dash:""},
+  work:{n:"工作/研究",c:"#6ea8e8",w:2,dash:""},
+  authority:{n:"权力/组织",c:"#8b949e",w:1.6,dash:"6,4"},
+  ritual:{n:"仪式/死亡",c:"#e0655c",w:4,dash:""},
+  treaty:{n:"盟约",c:"#e0b15c",w:2.5,dash:""},
+  speaking:{n:"代言",c:"#e6e1d5",w:2,dash:"10,4,2,4"},
+  bond:{n:"信任/陪伴",c:"#5cc8e0",w:2,dash:""},
+};
+const ROUTES={"R03":"over:38","P10":"over:48","R22":"over:28","P09":"under:814","P08":"left:804"};
+const LANES={novinha:376,marcao:400,libo:388};
+const T_NAME={marcao:"马考恩"};
+const LEVELS={S0:0,S1:1,S2:2};
+const byId=Object.fromEntries(PEOPLE.map(p=>[p.id,p]));
+const relById=Object.fromEntries(RELS.map(r=>[r.id,r]));
+/* 抽象头像: 按群体色相生成, 不使用未经授权的剧照 */
+const HUE={"星际来客":216,"特隆海姆":280,"人工智能":190,"虫族":120,"菲盖拉家":24,"希贝拉家":36,"殖民地权力":262,"坡奇尼奥":152};
+function avatar(p){const h=HUE[p.group]??200;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${h},44%,32%)"/><stop offset="1" stop-color="hsl(${h+32},50%,17%)"/></linearGradient></defs><rect width="120" height="120" fill="url(#g)"/><circle cx="60" cy="60" r="40" fill="none" stroke="hsla(${h},72%,74%,.55)" stroke-width="2"/><text x="60" y="75" text-anchor="middle" font-size="40" fill="hsl(${h},62%,82%)" font-family="Songti SC,STSong,serif">${p.name[0]}</text></svg>`)}`}
+
+/* ── 剧透模式 ── */
+let mode=1;
+function setMode(m){
+  if(m===2&&mode!==2){
+    const md=document.getElementById("spModal");md.classList.add("open");
+    document.getElementById("spOk").onclick=()=>{md.classList.remove("open");mode=2;syncMode();};
+    document.getElementById("spCancel").onclick=()=>{md.classList.remove("open");syncMode();};
+    return;
+  }
+  mode=m;syncMode();
+}
+function syncMode(){
+  document.querySelectorAll("#spMode button").forEach(b=>b.classList.toggle("active",Number(b.dataset.m)===mode));
+  if(curId)show(curId);
+  if(treeBuilt)renderTree();
+}
+document.querySelectorAll("#spMode button").forEach(b=>b.onclick=()=>setMode(Number(b.dataset.m)));
+
+/* ── 人名自动链接 ── */
+const SHORT={};PEOPLE.forEach(p=>SHORT[p.name]=p.id);
+Object.assign(SHORT,{"安德":"ender","华伦蒂":"valentine","皮波":"pipo","利波":"libo","欧安达":"ouanda","娜温妮阿":"novinha","马考恩":"marcao","米罗":"miro","埃拉":"ela","奥尔拉多":"olhado","科尤拉":"quara","格雷戈":"grego","佩雷格里诺":"peregrino","波斯基娜":"bosquinha","鲁特":"rooter","曼达楚阿":"mandachuva","吃树叶者":"leaf-eater","看星星者":"star-looker","虫族女王":"hive-queen","堂·克里斯托":"dom-cristao"});
+const NAME_RE=new RegExp(Object.keys(SHORT).map(k=>k==="安德"?"安德(?!鲁)":k).sort((a,b)=>b.length-a.length).join("|"),"g");
+function linkify(t){
+  t=t.replace(/\{([\w-]+)\}/g,(m,k)=>byId[k]?byId[k].name:m);
+  return t.replace(NAME_RE,m=>`<span class="lnk" data-goto="${SHORT[m]}">${m}</span>`);
+}
+
+/* ── 人物列表 ── */
+const CHIPS=["全部","希贝拉家","菲盖拉家","外星人类学家","殖民地权力","星际来客","特隆海姆","人工智能","虫族","坡奇尼奥"];
+let chip="全部";
+const tagsOf=p=>[...new Set([p.group,...(p.tags||[])])];
+function renderChips(){
+  const box=document.getElementById("chips");box.innerHTML="";
+  CHIPS.forEach(c=>{
+    const b=document.createElement("button");
+    b.textContent=c;b.className=c===chip?"active":"";
+    b.onclick=()=>{chip=c;renderChips();renderList()};
+    box.appendChild(b);
+  });
+}
+function renderList(){
+  const box=document.getElementById("list");box.innerHTML="";
+  const groups=[...new Set(PEOPLE.map(p=>p.group))];
+  groups.forEach(g=>{
+    const group=PEOPLE.filter(p=>p.group===g&&(chip==="全部"||tagsOf(p).includes(chip)));
+    if(!group.length)return;
+    const h=document.createElement("h2");h.textContent=g;box.appendChild(h);
+    const grid=document.createElement("div");grid.className="cards";
+    group.forEach(p=>{
+      const c=document.createElement("div");c.className="card";c.dataset.id=p.id;
+      c.innerHTML=`<img class="avatar" src="${avatar(p)}"><div><div class="name">${p.name}</div><div class="tag">${p.role}</div></div>${p.spoiler!=="S0"?`<span class="sp sp-${p.spoiler}">${p.spoiler}</span>`:""}`;
+      c.onclick=()=>show(p.id);
+      grid.appendChild(c);
+    });
+    box.appendChild(grid);
+  });
+}
+
+/* ── 详情 ── */
+let curId=null,firstLoad=true;
+function spBlock(p){
+  if(!p.desc2)return"";
+  const lv=LEVELS[p.spoiler];
+  if(mode>=lv)return`<div class="spbox"><div class="t">— ${p.spoiler==="S1"?"中期":"全书结局"}级内容 —</div><p>${linkify(p.desc2)}</p></div>`;
+  return`<div class="spbox locked" data-sp="${lv}"><div class="t">🔒 本段含 ${p.spoiler} 级剧透内容, 点击切换剧透模式查看</div><p></p></div>`;
+}
+function relList(p){
+  const rows=[];let locked=0;
+  RELS.forEach(r=>{
+    if(r.a!==p.id&&r.b!==p.id)return;
+    if(LEVELS[r.level]>mode){locked++;return}
+    const other=byId[r.a===p.id?r.b:r.a];
+    rows.push(`<div class="relrow"><span class="lnk" data-goto="${other.id}">${other.name}</span><span class="rv" style="color:${VSTYLE[r.v].c};border-color:${VSTYLE[r.v].c}">${VSTYLE[r.v].n}</span><span class="rl2">${r.label}</span><span class="lv">${r.level}</span></div>`);
+  });
+  let html=`<div class="relbox"><h3>关系(${rows.length}${locked?` / 另 ${locked} 条含剧透`:""})</h3>${rows.join("")}`;
+  if(locked)html+=`<div class="rellock" data-sp="${locked?1:0}">🔒 还有 ${locked} 条关系含剧透 — 提升剧透模式查看</div>`;
+  return html+"</div>";
+}
+function show(id){
+  const p=byId[id];curId=id;
+  document.querySelectorAll(".card").forEach(c=>c.classList.toggle("sel",c.dataset.id===id));
+  const d=document.getElementById("detail");
+  d.innerHTML=`
+    <button class="close-btn" id="closeBtn">✕ 返回人物列表</button>
+    <img class="portrait" src="${avatar(p)}">
+    <h2>${p.name}</h2>
+    <div class="en">${p.en}</div>
+    <div class="meta"><span>${p.group}</span><span>${p.role}</span><span>${p.spoiler!=="S0"?`含 ${p.spoiler} 级剧透`:"无剧透"}</span></div>
+    <p>${linkify(p.desc)}</p>
+    ${spBlock(p)}
+    ${relList(p)}`;
+  if(window.matchMedia("(min-width:821px)").matches)document.getElementById("list").querySelector(`[data-id="${id}"]`)?.scrollIntoView({block:"nearest"});
+  if(!firstLoad&&window.matchMedia("(max-width:820px)").matches)document.querySelector("section").classList.add("open");
+}
+document.querySelector("section").addEventListener("click",e=>{if(e.target.id==="closeBtn")document.querySelector("section").classList.remove("open")});
+document.getElementById("detail").addEventListener("click",e=>{
+  const t=e.target.closest(".lnk");if(t){show(t.dataset.goto);return}
+  const s=e.target.closest("[data-sp]");if(s)setMode(Math.max(mode+1,Number(s.dataset.sp)||1));
+});
+
+/* ════ 关系图谱 ════ */
+const T_POS=Object.fromEntries(T_NODES.map(n=>[n[0],{x:n[1],y:n[2]}]));
+function strokeOf(st){return `stroke="${st.c}" stroke-width="${st.w}"${st.dash?` stroke-dasharray="${st.dash}"`:""}`}
+function laneFor(a){return LANES[a]||null}
+function edgeSVG(r,dy){
+  const A=T_POS[r.a],B=T_POS[r.b],st=VSTYLE[r.v];
+  const route=ROUTES[r.id];
+  let inner="",lx=0,ly=0;
+  const label=`<text class="rl" x="0" y="0" text-anchor="middle">${r.label}</text>`;
+  function txt(x,y){return `<text class="rl" x="${x}" y="${y}" text-anchor="middle">${r.label}</text>`}
+  if(route){
+    const [kind,ys]=route.split(":");const ry=Number(ys);
+    if(kind==="over"){ // 从节点顶部绕到行上方
+      inner=`<path d="M${A.x},${A.y-8} L${A.x},${ry} L${B.x},${ry} L${B.x},${B.y-8}" fill="none" ${strokeOf(st)}/>`;
+      lx=(A.x+B.x)/2;ly=ry-6;
+    }else if(kind==="under"){ // 从节点底部绕到行下方
+      inner=`<path d="M${A.x},${A.y+80} L${A.x},${ry} L${B.x},${ry} L${B.x},${B.y+80}" fill="none" ${strokeOf(st)}/>`;
+      lx=(A.x+B.x)/2;ly=ry+16;
+    }else if(kind==="left"){ // 底部绕行 + 左侧上升
+      const upX=B.x;
+      inner=`<path d="M${A.x},${A.y+80} L${A.x},${ry} L${upX},${ry} L${upX},${B.y+66}" fill="none" ${strokeOf(st)}/>`;
+      lx=(A.x+upX)/2;ly=ry+16;
+    }
+    return {inner:`<g class="lk" data-a="${r.a}" data-b="${r.b}">${inner}${txt(lx,ly)}</g>`};
+  }
+  if(st.dbl){ // 婚姻: 双横线
+    const y=(A.y+B.y)/2+30+dy,xa=Math.min(A.x,B.x)+36,xb=Math.max(A.x,B.x)-36;
+    inner=`<line x1="${xa}" y1="${y-3}" x2="${xb}" y2="${y-3}" ${strokeOf(st)}/><line x1="${xa}" y1="${y+3}" x2="${xb}" y2="${y+3}" ${strokeOf(st)}/>`;
+    lx=(A.x+B.x)/2;ly=y-10;
+  }else if(st.elbow){ // 亲属: 总线式正交折线
+    const lane=laneFor(r.a)??(A.y+100+dy);
+    if(Math.abs(A.y-B.y)<10){
+      const y=A.y+30+dy,xa=Math.min(A.x,B.x)+36,xb=Math.max(A.x,B.x)-36;
+      inner=`<line x1="${xa}" y1="${y}" x2="${xb}" y2="${y}" ${strokeOf(st)}/>`;
+      lx=(A.x+B.x)/2;ly=y-8;
+    }else{
+      inner=`<path d="M${A.x},${A.y+88} L${A.x},${lane} L${B.x},${lane} L${B.x},${B.y-6}" fill="none" ${strokeOf(st)}/>`;
+      lx=(A.x+B.x)/2;ly=lane-8;
+    }
+  }else{ // 其他: 同排横线 / 上行直线 / 下行折线
+    if(Math.abs(A.y-B.y)<10){
+      const y=A.y+30+dy,xa=Math.min(A.x,B.x)+36,xb=Math.max(A.x,B.x)-36;
+      inner=`<line x1="${xa}" y1="${y}" x2="${xb}" y2="${y}" ${strokeOf(st)}/>`;
+      lx=(A.x+B.x)/2;ly=y-8;
+    }else if(B.y<A.y){
+      inner=`<line x1="${A.x}" y1="${A.y+64}" x2="${B.x}" y2="${B.y-4}" ${strokeOf(st)}/>`;
+      lx=(A.x+B.x)/2;ly=(A.y+B.y)/2+30;
+    }else{
+      const my=A.y+100+dy;
+      inner=`<path d="M${A.x},${A.y+66} L${A.x},${my} L${B.x},${my} L${B.x},${B.y-6}" fill="none" ${strokeOf(st)}/>`;
+      lx=(A.x+B.x)/2;ly=my-8;
+    }
+  }
+  return {inner:`<g class="lk" data-a="${r.a}" data-b="${r.b}">${inner}${txt(lx,ly)}</g>`};
+}
+let treeBuilt=false;
+(function buildLegend(){
+  const box=document.getElementById("legend");
+  box.innerHTML=Object.values(VSTYLE).map(st=>`<span><i ${st.dbl?'class="dbl"':""} style="border-color:${st.c}"></i>${st.n}</span>`).join("")+`<span style="color:#6e7781">悬停高亮关系 · 点击查看小传 · 边数随剧透模式变化</span>`;
+})();
+function renderTree(){
+  const cvs=document.getElementById("treeCanvas");
+  const vis=T_EDGES.map(e=>relById[e]).filter(r=>LEVELS[r.level]<=mode);
+  // 同排并行线错开
+  const rowCount={},rowIdx={};
+  vis.forEach(r=>{
+    const A=T_POS[r.a],B=T_POS[r.b];
+    if(VSTYLE[r.v].elbow||VSTYLE[r.v].dbl||ROUTES[r.id]||Math.abs(A.y-B.y)>=10)return;
+    const k=A.y;rowCount[k]=(rowCount[k]||0)+1;
+  });
+  const seen={};
+  let svg=`<svg width="1420" height="880">`;
+  vis.forEach(r=>{
+    const A=T_POS[r.a],B=T_POS[r.b];
+    let dy=0;
+    if(!VSTYLE[r.v].elbow&&!VSTYLE[r.v].dbl&&!ROUTES[r.id]&&Math.abs(A.y-B.y)<10){
+      const k=A.y;seen[k]=(seen[k]||0)+1;dy=seen[k]*7;
+    }
+    svg+=edgeSVG(r,dy).inner;
+  });
+  svg+="</svg>";
+  CLUSTER_LABELS.forEach(([t,x,y])=>svg+=`<div class="tcluster" style="left:${x}px;top:${y}px">${t}</div>`);
+  T_NODES.forEach(([id,x,y])=>{
+    const p=byId[id];
+    const tname=T_NAME[id]||p.name;
+    svg+=`<div class="tnode" data-id="${id}" style="left:${x}px;top:${y}px">
+      <img src="${avatar(p)}">${p.spoiler==="S2"?'<span class="sd">S2</span>':""}
+      <div class="tn">${tname}</div><div class="tt">${p.role.slice(0,8)}</div></div>`;
+  });
+  cvs.innerHTML=svg;
+  const lks=[...cvs.querySelectorAll(".lk")],nds=[...cvs.querySelectorAll(".tnode")];
+  const coarse=window.matchMedia("(pointer:coarse)").matches;
+  const actBar=document.getElementById("treeAction");
+  let stickyId=null;
+  function highlight(id){
+    cvs.classList.add("hovering");
+    lks.forEach(g=>g.classList.toggle("on",g.dataset.a===id||g.dataset.b===id));
+    const linked=new Set([id]);
+    lks.forEach(g=>{if(g.dataset.a===id)linked.add(g.dataset.b);if(g.dataset.b===id)linked.add(g.dataset.a)});
+    nds.forEach(m=>m.classList.toggle("on",linked.has(m.dataset.id)));
+  }
+  function clearHl(){cvs.classList.remove("hovering");lks.forEach(g=>g.classList.remove("on"));nds.forEach(m=>m.classList.remove("on"));stickyId=null;actBar.classList.remove("show")}
+  nds.forEach(n=>{
+    n.onclick=()=>{
+      const id=n.dataset.id;
+      if(coarse){
+        if(stickyId===id){showTreeDetail(id);actBar.classList.remove("show")}
+        else{stickyId=id;highlight(id);actBar.textContent=`查看「${byId[id].name}」小传 →`;actBar.classList.add("show");actBar.onclick=()=>{showTreeDetail(id);actBar.classList.remove("show")}}
+      }else showTreeDetail(id);
+    };
+    if(!coarse){n.onmouseenter=()=>highlight(n.dataset.id);n.onmouseleave=()=>clearHl()}
+  });
+  cvs.onclick=e=>{if(e.target===cvs||e.target.tagName==="svg")clearHl()};
+}
+function showTreeDetail(id){
+  const p=byId[id];
+  const d=document.getElementById("treeDetail");
+  d.innerHTML=`<button class="close-btn" id="tdClose">✕ 收起</button>
+    <img class="portrait" src="${avatar(p)}">
+    <h2>${p.name}</h2><div class="en">${p.en}</div>
+    <div class="meta"><span>${p.group}</span> · <span>${p.role}</span> · <span>${p.spoiler!=="S0"?`含 ${p.spoiler} 级剧透`:"无剧透"}</span></div>
+    <p>${linkify(p.desc)}</p>${p.desc2&&mode>=LEVELS[p.spoiler]?`<p>${linkify(p.desc2)}</p>`:""}`;
+  d.classList.add("open");
+  document.getElementById("tdClose").onclick=()=>d.classList.remove("open");
+  d.querySelectorAll(".lnk").forEach(t=>t.onclick=()=>showTreeDetail(t.dataset.goto));
+}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("active",x===b));
+  const tree=b.dataset.v==="tree";
+  document.getElementById("treeWrap").style.display=tree?"block":"none";
+  document.querySelector("main").style.display=tree?"none":"flex";
+  document.getElementById("treeDetail").classList.remove("open");
+  if(tree&&!treeBuilt){renderTree();treeBuilt=true}
+  if(tree)fixMobileTreeLayout();
+});
+/* 手机端顶栏换行后高度不固定：按实际顶栏高度校正图谱容器与详情面板，避免双重滚动/面板遮挡顶栏 */
+function fixMobileTreeLayout(){
+  const tw=document.getElementById("treeWrap"),td=document.getElementById("treeDetail");
+  if(window.matchMedia("(max-width:820px)").matches){
+    const hh=document.querySelector("header").offsetHeight;
+    tw.style.height=(window.innerHeight-hh)+"px";
+    td.style.top=hh+"px";
+  }else{tw.style.height="";td.style.top=""}
+}
+window.addEventListener("resize",()=>{if(document.getElementById("treeWrap").style.display==="block")fixMobileTreeLayout()});
+renderChips();
+renderList();
+show("ender");
+firstLoad=false;
+if(location.hash==="#tree"){document.querySelector('.tabs button[data-v="tree"]').click()}
+</script>
+</body></html>
